@@ -68,13 +68,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         : "All products";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-      <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{heading}</h1>
+    <div className="mx-auto max-w-7xl px-3 py-7 sm:px-5 sm:py-9 lg:px-8 lg:py-10">
+      <h1 className="break-words font-display text-2xl font-extrabold tracking-tight sm:text-4xl">{heading}</h1>
       <p className="mt-2 text-sm text-neutral-600" aria-live="polite">
         {result.total} {result.total === 1 ? "product" : "products"}
       </p>
 
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         {result.products.length > 0 ? (
           <>
             <ProductGrid products={result.products} priorityCount={4} />
@@ -87,7 +87,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         ) : (
           <EmptyState
             title="No products found"
-            body="Try another search or browse the full Shopora collection."
+            body="Try another search or browse the full Drishop collection."
             actionHref="/products"
             actionLabel="Clear filters"
           />

@@ -27,7 +27,7 @@ export async function sendOrderEmail(orderId: string, event: "paid" | "shipped")
     ? `We have confirmed your payment of ${formatNaira(order.total_kobo)}.`
     : "Your order is on its way. Sign in to view tracking updates.";
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const html = `<p>Thanks for shopping with Shopora.</p><p>${escapeHtml(detail)}</p><p>Order <strong>${escapeHtml(order.order_number)}</strong></p><p><a href="${origin}/account/orders/${encodeURIComponent(order.order_number)}">View your order</a></p>`;
+  const html = `<p>Thanks for shopping with Drishop.</p><p>${escapeHtml(detail)}</p><p>Order <strong>${escapeHtml(order.order_number)}</strong></p><p><a href="${origin}/account/orders/${encodeURIComponent(order.order_number)}">View your order</a></p>`;
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },

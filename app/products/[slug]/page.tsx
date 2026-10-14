@@ -31,8 +31,8 @@ export default async function ProductPage({ params }: Props) {
   const saved = user ? await isWishlisted(user.id, product.id) : false;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-neutral-500">
+    <div className="mx-auto max-w-7xl px-3 py-6 sm:px-5 sm:py-8 lg:px-8">
+      <nav aria-label="Breadcrumb" className="mb-5 text-xs text-neutral-500 sm:mb-6 sm:text-sm">
         <ol className="flex flex-wrap items-center gap-2">
           <li><Link href="/" className="hover:text-ink">Home</Link></li>
           {product.categorySlug ? (
@@ -45,16 +45,16 @@ export default async function ProductPage({ params }: Props) {
           ) : null}
           <li className="flex items-center gap-2" aria-current="page">
             <span aria-hidden="true">/</span>
-            <span className="text-ink">{product.name}</span>
+              <span className="line-clamp-1 max-w-[45vw] break-words text-ink sm:max-w-none">{product.name}</span>
           </li>
         </ol>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+      <div className="grid min-w-0 gap-6 sm:gap-10 lg:grid-cols-2 lg:gap-16">
         <ProductGallery images={product.images} name={product.name} />
         <div>
           {product.brand ? <p className="text-sm text-neutral-500">{product.brand}</p> : null}
-          <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="mt-1 break-words font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl">
             {product.name}
           </h1>
           <div className="mt-3">
@@ -82,7 +82,7 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       {related.length > 0 ? (
-        <section className="mt-20">
+        <section className="mt-12 sm:mt-20">
           <SectionHeader title="You may also like" href={`/products?category=${product.categorySlug}`} />
           <ProductGrid products={related} />
         </section>

@@ -36,7 +36,7 @@ the image copyright license; review visible marks before using an image in a liv
 ## Additional 30 catalog photos
 
 These additional source pages are marked free to use under the Unsplash License, which
-permits commercial use. They are illustrative catalog photography for fictional Shopora
+permits commercial use. They are illustrative catalog photography for fictional Drishop
 sample listings, not proof of a product's exact make, model, contents, or specifications.
 Replace them with vendor-authorized photos before representing real stock. Review visible
 product marks and recognizable people for separate trademark, endorsement, and personality

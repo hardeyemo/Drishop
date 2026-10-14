@@ -27,20 +27,20 @@ export default async function HomePage() {
     <>
       <section className="relative overflow-hidden bg-[#edf2ff] px-3 py-4 sm:px-5 sm:py-7 lg:px-8">
         <div aria-hidden="true" className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#ffd34e]/20 blur-3xl" />
-        <div className="relative mx-auto grid max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0c328f] via-[#174fc9] to-[#397cff] shadow-2xl shadow-blue-950/20 md:grid-cols-[1.02fr_0.98fr]">
-          <div className="relative flex min-h-[22rem] flex-col justify-center overflow-hidden px-6 py-9 text-white sm:min-h-[27rem] sm:px-10 sm:py-12 lg:px-14">
+        <div className="relative mx-auto grid w-[calc(100vw-1.5rem)] min-w-0 max-w-[calc(100vw-1.5rem)] grid-cols-1 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0c328f] via-[#174fc9] to-[#397cff] shadow-2xl shadow-blue-950/20 md:w-full md:max-w-7xl md:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
+          <div className="relative flex min-h-[22rem] min-w-0 flex-col justify-center overflow-hidden px-5 py-8 text-white sm:min-h-[27rem] sm:px-10 sm:py-12 lg:px-14">
             <div aria-hidden="true" className="absolute -right-24 -top-28 h-80 w-80 rounded-full border-[42px] border-white/[0.07] sm:-right-12 sm:h-[26rem] sm:w-[26rem]" />
-            <p className="relative mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white sm:text-xs">
+            <p className="relative mb-5 inline-flex w-fit max-w-full flex-wrap items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white sm:px-3.5 sm:text-xs sm:tracking-[0.16em]">
               <Sparkles className="h-4 w-4 text-[#ffd34e]" /> Your next great find starts here
             </p>
-            <h1 className="relative max-w-xl font-display text-[2.65rem] font-extrabold leading-[0.98] tracking-tight sm:text-6xl lg:text-[4.35rem]">
+            <h1 className="relative max-w-full font-display text-[2.5rem] font-extrabold leading-[0.98] tracking-tight sm:max-w-xl sm:text-6xl lg:text-[4.35rem]">
               Good finds.<br />
               <span className="text-[#ffd34e]">Great days.</span>
             </h1>
-            <p className="relative mt-5 max-w-md text-sm leading-relaxed text-blue-50/90 sm:text-base">
+            <p className="relative mt-5 max-w-full break-words text-sm leading-relaxed text-blue-50/90 sm:max-w-md sm:text-base">
               From everyday essentials to can&apos;t-miss tech, find more of what you love in one easy shop.
             </p>
-            <div className="relative mt-7 flex flex-wrap gap-3">
+            <div className="relative mt-7 flex min-w-0 flex-wrap gap-3">
               <Link href="/products" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#ffd34e] px-6 text-sm font-extrabold text-blue-950 shadow-lg shadow-blue-950/15 transition-transform hover:-translate-y-0.5 hover:bg-[#ffe078] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                 Start exploring <ArrowRight className="h-4 w-4" />
               </Link>
@@ -51,7 +51,7 @@ export default async function HomePage() {
           </div>
 
           {spotlight ? (
-            <Link href={`/products/${spotlight.slug}`} className="group relative isolate block min-h-[18rem] overflow-hidden bg-gradient-to-br from-[#ffe7a1] via-[#fff4d4] to-[#ffd780] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-blue-950 sm:min-h-[22rem] md:min-h-[27rem]">
+            <Link href={`/products/${spotlight.slug}`} className="group relative isolate block min-h-[18rem] min-w-0 overflow-hidden bg-gradient-to-br from-[#ffe7a1] via-[#fff4d4] to-[#ffd780] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-blue-950 sm:min-h-[22rem] md:min-h-[27rem]">
               <div aria-hidden="true" className="absolute left-1/2 top-1/2 h-[19rem] w-[19rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/25 shadow-[0_0_0_24px_rgba(255,255,255,0.16),0_0_0_50px_rgba(255,255,255,0.1)] sm:h-[24rem] sm:w-[24rem]" />
               <div className="absolute left-4 top-4 z-10 rounded-full bg-white px-3.5 py-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-blue-950 shadow-md sm:left-6 sm:top-6 sm:text-xs">
                 <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[#f28b21]" />In the spotlight
@@ -79,7 +79,7 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-      <main className="mx-auto max-w-7xl space-y-12 px-4 py-9 sm:space-y-16 sm:py-12 lg:px-8">
+      <main className="mx-auto max-w-7xl space-y-10 px-3 py-7 sm:space-y-16 sm:px-5 sm:py-12 lg:px-8">
         {hasProducts ? rails.filter((rail) => rail.items.length > 0).map((rail) => (
           <section key={rail.title}>
             <SectionHeader title={rail.title} href={rail.href} linkLabel="View all" />

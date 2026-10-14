@@ -63,7 +63,7 @@ export function ProductPurchase({ product }: { product: ProductDetail }) {
     <div className="space-y-6">
       <div>
         <p className="flex flex-wrap items-baseline gap-3">
-          <span className="font-display text-4xl font-extrabold tracking-tight">{formatNaira(variant.priceKobo)}</span>
+          <span className="break-all font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{formatNaira(variant.priceKobo)}</span>
           {variant.compareAtKobo ? (
             <span className="text-base text-neutral-500 line-through">{formatNaira(variant.compareAtKobo)}</span>
           ) : null}

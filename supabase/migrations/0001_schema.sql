@@ -1,4 +1,4 @@
--- Shopora schema. All money is stored as integer kobo (NGN * 100).
+-- Drishop schema. All money is stored as integer kobo (NGN * 100).
 create extension if not exists pgcrypto;
 create extension if not exists pg_trgm;
 

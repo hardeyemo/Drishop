@@ -1,4 +1,4 @@
-# Shopora product images
+# Drishop product images
 
 The catalogue stores public Supabase Storage URLs in `public.product_images.url`. Migration
 `0002_rls.sql` creates the public `product-images` bucket and restricts writes to admins.

@@ -1,4 +1,4 @@
-# Shopora
+# Drishop
 
 Next.js (App Router) + TypeScript + Tailwind + Supabase marketplace for Nigeria.
 

@@ -28,7 +28,7 @@ export function LoginForm({ next }: { next: string }) {
         Sign in
       </SubmitButton>
       <p className="text-center text-sm text-neutral-600">
-        New to Shopora?{" "}
+        New to Drishop?{" "}
         <Link href={`/register?next=${encodeURIComponent(next)}`} className="font-medium text-ink underline underline-offset-4">
           Create an account
         </Link>

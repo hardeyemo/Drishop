@@ -6,14 +6,14 @@ import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <section className="mx-auto max-w-3xl px-4 py-10 sm:py-16" aria-labelledby="error-title">
+    <section className="mx-auto max-w-3xl px-3 py-7 sm:px-4 sm:py-16" aria-labelledby="error-title">
       <div className="overflow-hidden rounded-3xl border border-blue-950/10 bg-white shadow-xl shadow-blue-950/5">
-        <div className="relative overflow-hidden bg-[#174fc9] px-6 py-8 text-white sm:px-10 sm:py-10">
+        <div className="relative overflow-hidden bg-[#174fc9] px-5 py-7 text-white sm:px-10 sm:py-10">
           <Sparkles aria-hidden="true" className="absolute -right-2 -top-5 h-32 w-32 rotate-12 text-white/10" />
           <p className="relative inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white">
             <CircleAlert className="h-4 w-4 text-[#ffd34e]" /> A little pause
           </p>
-          <h1 id="error-title" className="relative mt-4 max-w-xl font-display text-3xl font-extrabold leading-tight sm:text-4xl">
+          <h1 id="error-title" className="relative mt-4 max-w-xl font-display text-2xl font-extrabold leading-tight sm:text-4xl">
             We couldn&apos;t load this page
           </h1>
           <p className="relative mt-3 max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">

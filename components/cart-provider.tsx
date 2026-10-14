@@ -23,7 +23,8 @@ type CartContextValue = {
 };
 
 type CartMode = "loading" | "local" | "account";
-const STORAGE_KEY = "shopora-cart-v1";
+const STORAGE_KEY = "drishop-cart-v1";
+const LEGACY_STORAGE_KEY = "shopora-cart-v1";
 const CartContext = React.createContext<CartContextValue | null>(null);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -33,7 +34,7 @@ function clampQty(qty: number, max: number) {
 
 function readGuestCart(): CartItem[] {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
     return parsed.slice(0, 50).flatMap((value): CartItem[] => {
@@ -87,7 +88,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setMode("account");
         setItems(result.items);
         setError(result.warning ?? null);
-        try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* cart remains in memory */ }
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+          window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+        } catch { /* cart remains in memory */ }
       } else if (result.ok) {
         setMode("local");
         setItems(guestItems);
@@ -112,7 +116,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (!hydrated || mode !== "local") return;
-    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* private mode or storage quota */ }
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch { /* private mode or storage quota */ }
   }, [items, hydrated, mode]);
 
   React.useEffect(() => {
@@ -205,7 +212,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clear: async () => {
         setItems([]);
         setError(null);
-        try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory clear still works */ }
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+          window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+        } catch { /* in-memory clear still works */ }
         if (mode === "account") {
           const result = await clearSavedCart();
           if (!result.ok) setError(result.error ?? "Your cart could not be cleared from your account.");

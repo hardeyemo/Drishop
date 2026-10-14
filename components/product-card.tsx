@@ -10,7 +10,7 @@ export function ProductCard({ product, priority }: { product: ProductCardData; p
   const soldOut = product.totalStock === 0;
 
   return (
-    <article className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-950/10 sm:p-3">
+    <article className="group relative flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-950/10 sm:rounded-2xl sm:p-3">
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#f5f7fb]">
         <ProductImage
           url={product.imageUrl}
@@ -34,14 +34,14 @@ export function ProductCard({ product, priority }: { product: ProductCardData; p
           </span>
         ) : null}
       </div>
-      <div className="mt-2.5 flex flex-1 flex-col gap-1 px-1 pb-1">
+      <div className="mt-2 flex min-w-0 flex-1 flex-col gap-1 px-0.5 pb-0.5 sm:mt-2.5 sm:px-1 sm:pb-1">
         {product.brand ? <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">{product.brand}</p> : null}
-        <h3 className="line-clamp-2 min-h-9 text-sm font-semibold leading-snug text-slate-900">{product.name}</h3>
+        <h3 className="line-clamp-2 min-h-9 break-words text-[13px] font-semibold leading-snug text-slate-900 sm:text-sm">{product.name}</h3>
         {product.description ? <p className="line-clamp-1 text-xs leading-5 text-slate-500">{product.description}</p> : null}
         <RatingStars value={product.ratingAvg} count={product.ratingCount} />
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
           <p className="flex min-w-0 flex-wrap items-baseline gap-1.5">
-            <span className="font-display text-base font-extrabold tracking-tight text-blue-950 sm:text-lg">{formatNaira(product.minPriceKobo)}</span>
+            <span className="break-all font-display text-sm font-extrabold tracking-tight text-blue-950 sm:text-lg">{formatNaira(product.minPriceKobo)}</span>
             {product.compareAtKobo ? <span className="text-[11px] text-neutral-500 line-through">{formatNaira(product.compareAtKobo)}</span> : null}
           </p>
           <ProductCardAction product={product} />
@@ -53,7 +53,7 @@ export function ProductCard({ product, priority }: { product: ProductCardData; p
 
 export function ProductGrid({ products, priorityCount = 0 }: { products: ProductCardData[]; priorityCount?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-2.5 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 lg:grid-cols-4">
       {products.map((p, i) => (
         <ProductCard key={p.id} product={p} priority={i < priorityCount} />
       ))}

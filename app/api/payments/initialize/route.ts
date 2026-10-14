@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   if (activePayment?.authorization_url) return NextResponse.json({ authorizationUrl: activePayment.authorization_url });
   if (activePayment) return NextResponse.json({ error: "Payment setup is already in progress. Retry in a few seconds." }, { status: 409 });
 
-  const reference = `shopora_${crypto.randomUUID().replaceAll("-", "")}`;
+  const reference = `drishop_${crypto.randomUUID().replaceAll("-", "")}`;
   const { error: reserveError } = await admin.from("payments").insert({ order_id: order.id, provider: "paystack", reference,
     amount_kobo: order.total_kobo, currency: order.currency, status: "initialized" });
   if (reserveError) {

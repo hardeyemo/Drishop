@@ -75,13 +75,13 @@ export default async function OrderPage({ params }: Props) {
 
       <ul className="mt-6 divide-y divide-line border-y border-line">
         {order.items.map((i) => (
-          <li key={i.id} className="flex justify-between gap-4 py-3 text-sm">
+        <li key={i.id} className="flex min-w-0 justify-between gap-3 py-3 text-sm sm:gap-4">
             <div className="min-w-0">
               <p className="font-medium">{i.product_name}</p>
               {i.variant_name ? <p className="text-xs text-neutral-500">{i.variant_name}</p> : null}
               <p className="text-xs text-neutral-500">{formatNaira(i.unit_price_kobo)} × {i.quantity}</p>
             </div>
-            <p className="tabular-nums">{formatNaira(i.line_total_kobo)}</p>
+            <p className="max-w-[42%] break-all text-right tabular-nums">{formatNaira(i.line_total_kobo)}</p>
           </li>
         ))}
       </ul>

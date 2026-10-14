@@ -29,7 +29,7 @@ export async function updateOrderStatus(formData: FormData) {
   }).eq("id", order.id).eq("status", order.status);
   if (error) return;
   await db.from("order_events").insert({ order_id: order.id, status: parsed.data.status,
-    note: `Status updated by Shopora admin${parsed.data.trackingNumber ? `; tracking ${parsed.data.trackingNumber}` : ""}.` });
+    note: `Status updated by Drishop admin${parsed.data.trackingNumber ? `; tracking ${parsed.data.trackingNumber}` : ""}.` });
   if (parsed.data.status === "shipped") await sendOrderEmail(order.id, "shipped");
   revalidatePath("/admin");
   revalidatePath(`/account/orders/${order.order_number}`);

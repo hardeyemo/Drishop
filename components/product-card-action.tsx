@@ -48,7 +48,7 @@ export function ProductCardAction({ product }: { product: ProductCardData }) {
               setAdded(false);
               setError("");
             }}
-            className="h-8 max-w-20 rounded-lg border border-slate-300 bg-white px-1 text-[11px] font-medium text-slate-700 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-700/15 sm:max-w-28 sm:px-1.5"
+            className="h-9 max-w-16 rounded-lg border border-slate-300 bg-white px-1 text-[11px] font-medium text-slate-700 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-700/15 sm:h-10 sm:max-w-28 sm:px-1.5"
           >
             {availableVariants.map((option) => (
               <option key={option.id} value={option.id}>{option.name}</option>
@@ -56,7 +56,7 @@ export function ProductCardAction({ product }: { product: ProductCardData }) {
           </select>
         </label>
       ) : null}
-      <button type="button" aria-label={`${added ? "Added" : "Add"} ${product.name} to cart`} title={added ? "Added to cart" : "Add to cart"} disabled={pending} onClick={() => void onAdd(variant)} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#174fc9] text-white shadow-sm transition-colors hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 disabled:cursor-wait disabled:opacity-70">
+      <button type="button" aria-label={`${added ? "Added" : "Add"} ${product.name} to cart`} title={added ? "Added to cart" : "Add to cart"} disabled={pending} onClick={() => void onAdd(variant)} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#174fc9] text-white shadow-sm transition-colors hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 disabled:cursor-wait disabled:opacity-70">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
       </button>
       <span aria-live="polite" className="sr-only">{added ? "Added to cart." : error}</span>

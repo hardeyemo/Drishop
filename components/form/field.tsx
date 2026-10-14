@@ -22,7 +22,7 @@ export function Field({ id, label, error, hint, className, ...props }: Props) {
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         className={cn(
-          "h-11 w-full rounded-md border bg-white px-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep",
+          "h-12 w-full rounded-md border bg-white px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep sm:h-11 sm:text-sm",
           error ? "border-red-600" : "border-ink/20",
           className,
         )}

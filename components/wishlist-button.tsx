@@ -33,7 +33,7 @@ export function WishlistButton({
         aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
         aria-pressed={saved}
         disabled={pending}
-        className={cn("h-9 w-9 rounded-full border border-line bg-white/95 p-0 shadow-sm hover:bg-white", saved && "text-red-600")}
+        className={cn("h-11 w-11 rounded-full border border-line bg-white/95 p-0 shadow-sm hover:bg-white", saved && "text-red-600")}
         onClick={() => start(async () => {
           setError(false);
           const res = await toggleWishlist(productId);

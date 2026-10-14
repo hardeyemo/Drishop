@@ -14,12 +14,12 @@ export function SearchForm({ className, inputId = "site-search" }: { className?:
           type="search"
           maxLength={80}
           placeholder="Search phones, shoes, kitchen…"
-          className="min-w-0 flex-1 bg-transparent px-4 text-sm text-blue-950 outline-none placeholder:text-neutral-500"
+          className="min-w-0 flex-1 bg-transparent px-3 text-base text-emerald-950 outline-none placeholder:text-neutral-500 sm:px-4 sm:text-sm"
         />
         <button
           type="submit"
           aria-label="Search"
-          className="flex w-12 items-center justify-center bg-[#ffd34e] text-blue-950 transition-colors hover:bg-[#ffdf73] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-blue-950"
+          className="flex min-h-11 w-12 shrink-0 items-center justify-center bg-[#ffd34e] text-emerald-950 transition-colors hover:bg-[#ffdf73] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-emerald-950"
         >
           <Search className="h-5 w-5" />
         </button>

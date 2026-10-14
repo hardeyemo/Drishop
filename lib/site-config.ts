@@ -1,4 +1,4 @@
-export const SITE_NAME = "Shopora";
+export const SITE_NAME = "Drishop";
 
 // Single source of truth. Checkout (Phase 3) will read this same value on the server.
 export const FREE_SHIPPING_THRESHOLD_KOBO = 5_000_000; // ₦50,000

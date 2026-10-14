@@ -4,7 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { Category, ProductCardData, ProductDetail } from "@/lib/types";
 
-export const PAGE_SIZE = 12;
+// Keep the initial catalogue page large enough to show the original seeded set
+// (18 products) together while retaining pagination for larger catalogues.
+export const PAGE_SIZE = 24;
 
 export const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
@@ -208,7 +210,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
   fail(error);
   if (!data) return null;
 
-  const row = data as unknown as CardRow & {
+  const row = data as unknown as Omit<CardRow, "variants"> & {
     description: string | null;
     category: { name: string; slug: string } | null;
     variants: {

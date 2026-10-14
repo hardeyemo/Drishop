@@ -14,17 +14,18 @@ export default async function AdminPage() {
   const [ordersRes, productsRes, productsCount, ordersCount] = await Promise.all([
     db.from("orders").select("id,order_number,email,status,total_kobo,created_at,carrier,tracking_number")
       .order("created_at", { ascending: false }).limit(12),
-    db.from("products").select("id,name,slug,is_active,total_stock,min_price_kobo").order("name").limit(30),
+    db.from("products").select("id,name,slug,is_active,total_stock,min_price_kobo").order("name").limit(200),
     db.from("products").select("id", { count: "exact", head: true }),
     db.from("orders").select("id", { count: "exact", head: true }),
   ]);
   const orders = ordersRes.data ?? [];
   const products = productsRes.data ?? [];
+  const productLoadFailed = Boolean(productsRes.error || productsCount.error);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-4 py-10 lg:px-8">
+    <div className="mx-auto max-w-7xl space-y-8 px-3 py-7 sm:space-y-10 sm:px-5 sm:py-9 lg:px-8 lg:py-10">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[.18em] text-gold-deep">Shopora operations</p>
+        <p className="text-sm font-medium uppercase tracking-[.18em] text-gold-deep">Drishop operations</p>
         <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Admin dashboard</h1>
       </div>
 
@@ -42,7 +43,7 @@ export default async function AdminPage() {
 
       <section aria-labelledby="orders-heading">
         <h2 id="orders-heading" className="font-display text-2xl font-bold">Recent orders</h2>
-        <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+        <div className="mt-4 overflow-x-auto overscroll-x-contain rounded-xl border border-line">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-surface text-xs uppercase tracking-wide text-neutral-600"><tr>
               <th className="px-4 py-3">Order</th><th className="px-4 py-3">Customer</th><th className="px-4 py-3">Total</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Fulfilment</th>
@@ -71,6 +72,11 @@ export default async function AdminPage() {
 
       <section aria-labelledby="products-heading">
         <h2 id="products-heading" className="font-display text-2xl font-bold">Catalogue and stock</h2>
+        {productLoadFailed ? (
+          <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            We couldn’t load the catalogue. Check your admin access and database connection, then refresh.
+          </p>
+        ) : null}
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => <article key={product.id} className="flex items-center justify-between gap-4 rounded-xl border border-line bg-white p-4">
             <div className="min-w-0"><h3 className="truncate font-medium">{product.name}</h3><p className="mt-1 text-xs text-neutral-600">{formatNaira(product.min_price_kobo)} · {product.total_stock} in stock · {product.is_active ? "Live" : "Hidden"}</p></div>
@@ -79,7 +85,7 @@ export default async function AdminPage() {
               <button className="shrink-0 rounded-md border border-line px-3 py-2 text-xs font-medium hover:bg-surface">{product.is_active ? "Hide" : "Publish"}</button>
             </form>
           </article>)}
-          {products.length === 0 ? <p className="text-sm text-neutral-500">No products in the catalogue.</p> : null}
+          {!productLoadFailed && products.length === 0 ? <p className="text-sm text-neutral-500">No products in the catalogue.</p> : null}
         </div>
       </section>
     </div>

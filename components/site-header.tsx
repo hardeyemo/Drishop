@@ -17,15 +17,15 @@ export async function SiteHeader() {
   const signedIn = Boolean(user);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-blue-950/10 bg-white shadow-[0_3px_18px_rgba(20,40,90,0.12)]">
-      <div className="bg-[#174fc9] text-white">
+    <header className="sticky top-0 z-40 border-b border-emerald-950/10 bg-white shadow-[0_3px_18px_rgba(6,78,59,0.12)]">
+      <div className="bg-[#075c46] text-white">
         <div className="relative mx-auto flex min-h-[4.25rem] max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-5 lg:px-7">
           <MobileNav categories={top} signedIn={signedIn} buttonClassName="text-white md:hidden" />
           <Link href="/" className="shrink-0 font-display text-[1.35rem] font-extrabold tracking-tight text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:text-[1.65rem]">
             {SITE_NAME}<span className="text-[#ffd34e]">.</span>
           </Link>
 
-          <Link href="/products" className="hidden h-11 shrink-0 items-center gap-2 rounded-full bg-[#0e3da2] px-3 text-left transition-colors hover:bg-[#0b348b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white lg:flex">
+          <Link href="/products" className="hidden h-11 shrink-0 items-center gap-2 rounded-full bg-[#054b3b] px-3 text-left transition-colors hover:bg-[#033c2f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white lg:flex">
             <MapPin className="h-5 w-5 text-[#ffd34e]" />
             <span className="leading-tight"><span className="block text-[11px] text-white/75">Shopping in</span><span className="block text-xs font-bold">Nigeria</span></span>
             <ChevronDown className="ml-1 h-4 w-4" />
@@ -42,7 +42,7 @@ export async function SiteHeader() {
               <User className="h-5 w-5" />
               <span className="hidden text-left leading-tight lg:block"><span className="block text-[11px] text-white/75">{signedIn ? "Welcome back" : "Sign in"}</span><span className="block text-xs font-bold">Account</span></span>
             </Link>
-            <CartButton className="!text-white hover:!bg-white/10 focus-visible:!outline-white" badgeClassName="!bg-[#ffd34e] !text-blue-950" showLabel />
+            <CartButton className="!text-white hover:!bg-white/10 focus-visible:!outline-white" badgeClassName="!bg-[#ffd34e] !text-emerald-950" showLabel />
           </div>
         </div>
 
@@ -51,14 +51,14 @@ export async function SiteHeader() {
         </div>
       </div>
 
-      <nav aria-label="Shop departments" className="scrollbar-none overflow-x-auto bg-[#eaf0ff]">
+      <nav aria-label="Shop departments" className="scrollbar-none overflow-x-auto bg-[#e9f4ee]">
         <div className="mx-auto flex h-11 w-max min-w-full max-w-[1600px] items-center gap-2 px-3 text-xs sm:gap-2.5 sm:px-5 lg:px-7">
-          <Link href="/products" className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-white px-3 font-bold text-blue-950 shadow-sm transition-colors hover:bg-[#d8e4ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800">
+          <Link href="/products" className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-white px-3 font-bold text-emerald-950 shadow-sm transition-colors hover:bg-[#d8eadf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800">
             <LayoutGrid className="h-4 w-4" /> Departments <ChevronDown className="h-3.5 w-3.5" />
           </Link>
-          <Link href="/products?deals=1" className="inline-flex h-8 shrink-0 items-center rounded-full bg-[#fff1c2] px-3 font-bold text-[#704900] transition-colors hover:bg-[#ffe59a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800">Deals</Link>
+          <Link href="/products?deals=1" className="inline-flex h-8 shrink-0 items-center rounded-full bg-[#fff1c2] px-3 font-bold text-[#704900] transition-colors hover:bg-[#ffe59a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800">Deals</Link>
           {top.map((category) => (
-            <Link key={category.slug} href={`/products?category=${category.slug}`} className="inline-flex h-8 shrink-0 items-center rounded-full bg-white/85 px-3 font-medium text-blue-950 transition-colors hover:bg-white hover:text-[#174fc9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800">
+            <Link key={category.slug} href={`/products?category=${category.slug}`} className="inline-flex h-8 shrink-0 items-center rounded-full bg-white/85 px-3 font-medium text-emerald-950 transition-colors hover:bg-white hover:text-[#075c46] focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800">
               {category.name}
             </Link>
           ))}

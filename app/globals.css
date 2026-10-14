@@ -7,6 +7,8 @@
   body {
     @apply bg-white font-body text-ink antialiased;
   }
+  button, input, select, textarea { font: inherit; }
+  button, a, input, select, textarea { touch-action: manipulation; }
   ::selection { background: #F4EAD0; }
 }
 

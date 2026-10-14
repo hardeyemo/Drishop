@@ -29,7 +29,7 @@ export type SavedAddress = {
 type Problem = { message: string; variantId?: string };
 
 const selectCls =
-  "h-11 w-full rounded-md border border-ink/20 bg-white px-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep";
+  "h-12 w-full rounded-md border border-ink/20 bg-white px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep sm:h-11 sm:text-sm";
 
 export function CheckoutForm({
   zones,
@@ -192,8 +192,8 @@ export function CheckoutForm({
   const cityListId = "checkout-city-options";
 
   return (
-    <form onSubmit={onSubmit} noValidate className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]">
-      <div className="space-y-8">
+    <form onSubmit={onSubmit} noValidate className="mt-6 grid min-w-0 gap-7 sm:mt-8 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="min-w-0 space-y-7 sm:space-y-8">
         <section aria-labelledby="delivery-heading" className="space-y-4">
           <h2 id="delivery-heading" className="font-display text-xl font-bold">Delivery details</h2>
 
@@ -251,7 +251,7 @@ export function CheckoutForm({
                 <p className="mt-1 text-xs text-amber-800">Delivery pricing is not configured for this state yet.</p>
               ) : null}
               {addr.state && zoneFee !== undefined ? (
-                <p className="mt-1 text-xs text-neutral-500">Configured state delivery rate: {formatNaira(zoneFee)}. The final fee appears in your order summary.</p>
+                <p className="mt-1 text-xs text-neutral-500">Configured delivery rate for {addr.state}: {formatNaira(zoneFee)}. Your final delivery fee is shown below.</p>
               ) : null}
             </div>
           </div>
@@ -259,7 +259,7 @@ export function CheckoutForm({
           <div>
             <label htmlFor="notes" className="mb-1.5 block text-sm font-medium">Delivery notes (optional)</label>
             <textarea id="notes" rows={3} maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-md border border-ink/20 px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep" />
+              className="w-full rounded-md border border-ink/20 px-3 py-2 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep sm:text-sm" />
           </div>
 
           <label className="flex items-center gap-2 text-sm">
@@ -269,7 +269,7 @@ export function CheckoutForm({
         </section>
       </div>
 
-      <aside aria-labelledby="summary-heading" className="h-fit rounded-2xl border border-line p-6 lg:sticky lg:top-40">
+      <aside aria-labelledby="summary-heading" className="h-fit min-w-0 rounded-2xl border border-line p-4 sm:p-6 lg:sticky lg:top-40">
         <h2 id="summary-heading" className="font-display text-lg font-bold">Order summary</h2>
 
         {blocking ? (
@@ -292,12 +292,15 @@ export function CheckoutForm({
                   {l.variantName ? <p className="text-xs text-neutral-500">{l.variantName}</p> : null}
                   <p className="text-xs text-neutral-500">Qty {l.quantity}</p>
                 </div>
-                <p className="text-sm font-medium tabular-nums">{formatNaira(l.lineTotalKobo)}</p>
+                <p className="max-w-[42%] break-all text-right text-sm font-medium tabular-nums">{formatNaira(l.lineTotalKobo)}</p>
               </li>
             );
           })}
           {!quote && !blocking ? (
-            <li className="py-6 text-sm text-neutral-500" role="status">Checking prices and stock…</li>
+            <li className="flex items-center gap-2 py-6 text-sm text-neutral-600" role="status" aria-live="polite">
+              <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-ink/20 border-t-ink motion-reduce:animate-none" />
+              {pricing ? "Updating prices and stock…" : "Waiting for a price quote…"}
+            </li>
           ) : null}
         </ul>
 
@@ -313,8 +316,8 @@ export function CheckoutForm({
                   if (codeInput.trim()) applyCode();
                 }
               }}
-              className="h-10 min-w-0 flex-1 rounded-md border border-ink/20 px-3 text-sm uppercase focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep" />
-            <Button variant="outline" size="md" className="h-10" onClick={applyCode} disabled={!codeInput.trim()}>Apply</Button>
+              className="h-11 min-w-0 flex-1 rounded-md border border-ink/20 px-3 text-base uppercase focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep sm:h-10 sm:text-sm" />
+            <Button variant="outline" size="md" className="h-11 px-4 sm:h-10" onClick={applyCode} disabled={!codeInput.trim()}>Apply</Button>
           </div>
           {discountError ? <p role="alert" className="mt-1 text-xs text-red-700">{discountError}</p> : null}
           {appliedCode && quote && quote.discountKobo > 0 ? (
@@ -334,8 +337,12 @@ export function CheckoutForm({
           <div className="flex justify-between">
             <dt>Delivery</dt>
             <dd className="tabular-nums">
-              {!quote || quote.shippingKobo === null
+              {!addr.state
                 ? "Choose a state"
+                : pricing
+                  ? "Calculating…"
+                  : !quote || quote.shippingKobo === null
+                    ? "Unavailable"
                 : quote.shippingKobo === 0
                   ? "Free"
                   : formatNaira(quote.shippingKobo)}
@@ -355,6 +362,10 @@ export function CheckoutForm({
           </span>
         </p>
 
+        <p className="mt-2 text-xs leading-relaxed text-neutral-500">
+          Your total includes the confirmed delivery fee and any discount. Payment is completed securely with Paystack after you continue.
+        </p>
+
         {submitError ? (
           <p role="alert" className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
             {submitError.message}
@@ -365,7 +376,7 @@ export function CheckoutForm({
         ) : null}
 
         <Button type="submit" variant="gold" size="lg" className="mt-5 w-full" disabled={!canSubmit}>
-          {submitting ? "Placing order…" : "Place order"}
+          {submitting ? "Preparing secure payment…" : "Continue to secure payment"}
         </Button>
         <Link href="/cart" className={buttonVariants({ variant: "ghost", size: "sm", className: "mt-2 w-full" })}>
           Back to cart

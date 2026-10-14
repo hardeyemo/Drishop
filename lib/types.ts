@@ -34,7 +34,7 @@ export type Variant = {
   stock: number;
 };
 
-export type ProductDetail = ProductCardData & {
+export type ProductDetail = Omit<ProductCardData, "variants"> & {
   categorySlug: string | null;
   images: { url: string; alt: string | null }[];
   variants: Variant[];

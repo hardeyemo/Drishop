@@ -13,7 +13,7 @@ const links = [
 export function AccountNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Account" className="flex gap-1 overflow-x-auto md:flex-col">
+    <nav aria-label="Account" className="scrollbar-none -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0">
       {links.map((l) => {
         const active = pathname === l.href;
         return (
@@ -22,7 +22,7 @@ export function AccountNav() {
             href={l.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "whitespace-nowrap rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep",
+              "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-lg px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep",
               active ? "bg-ink font-medium text-white" : "hover:bg-surface",
             )}
           >

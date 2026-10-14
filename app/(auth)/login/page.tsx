@@ -12,7 +12,7 @@ export default async function LoginPage({
   const sp = await searchParams;
   return (
     <>
-      <h1 className="font-display text-3xl font-extrabold tracking-tight">Sign in</h1>
+      <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Sign in</h1>
       <p className="mb-6 mt-2 text-sm text-neutral-600">Welcome back. Sign in to see your wishlist and orders.</p>
       {sp.error === "callback" ? (
         <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">

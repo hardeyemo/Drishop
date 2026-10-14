@@ -8,7 +8,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   const sp = await searchParams;
   return (
     <>
-      <h1 className="font-display text-3xl font-extrabold tracking-tight">Create your account</h1>
+      <h1 className="break-words font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Create your account</h1>
       <p className="mb-6 mt-2 text-sm text-neutral-600">Save favourites and track your orders.</p>
       <RegisterForm next={safeNext(sp.next, "/")} />
     </>
