@@ -16,7 +16,7 @@ function stockLabel(stock: number) {
   return { text: "In stock", tone: "text-green-700" };
 }
 
-export function ProductPurchase({ product }: { product: ProductDetail }) {
+export function ProductPurchase({ product, returnTo = "/products" }: { product: ProductDetail; returnTo?: string }) {
   const { add } = useCart();
   const firstAvailable = product.variants.find((v) => v.stock > 0) ?? product.variants[0];
   const [variantId, setVariantId] = React.useState(firstAvailable?.id);
@@ -67,6 +67,7 @@ export function ProductPurchase({ product }: { product: ProductDetail }) {
           {variant.compareAtKobo ? (
             <span className="text-base text-neutral-500 line-through">{formatNaira(variant.compareAtKobo)}</span>
           ) : null}
+          {variant.fridayDeal ? <span className="rounded-full bg-[#075c46] px-2.5 py-1 text-xs font-bold text-white">Friday deal</span> : null}
           {off > 0 ? <span className="rounded bg-gold px-2 py-0.5 text-sm font-bold">Save {off}%</span> : null}
         </p>
         <p className={cn("mt-2 text-sm font-medium", stock.tone)}>{stock.text}</p>
@@ -144,6 +145,7 @@ export function ProductPurchase({ product }: { product: ProductDetail }) {
           </p>
         ) : null}
       </div>
+      <Link href={returnTo} className={buttonVariants({ variant: "outline", size: "md" })}>Continue shopping</Link>
     </div>
   );
 }

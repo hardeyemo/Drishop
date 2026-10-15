@@ -20,6 +20,7 @@ export type Quote = {
   /** null until a delivery state is chosen */
   shippingKobo: number | null;
   totalKobo: number;
+  firstOrderFreeDelivery: boolean;
 };
 
 export type CheckoutFailure = {
@@ -27,6 +28,7 @@ export type CheckoutFailure = {
   error: string;
   field: "cart" | "discount" | "shipping" | "address";
   variantId?: string;
+  offerReserved?: boolean;
 };
 
 export type QuoteResult = { ok: true; quote: Quote } | CheckoutFailure;

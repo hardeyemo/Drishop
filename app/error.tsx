@@ -1,10 +1,24 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { CircleAlert, RefreshCw, ShoppingBag, Sparkles } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const pathname = usePathname();
+  const [retrying, startRetry] = React.useTransition();
+
+  React.useEffect(() => {
+    // Route and digest are enough to correlate with server logs without logging query strings or user data.
+    console.error("[Drishop] Page segment failed", {
+      path: pathname,
+      name: error.name || "Error",
+      digest: error.digest ?? null,
+    });
+  }, [error.digest, error.name, pathname]);
+
   return (
     <section className="mx-auto max-w-3xl px-3 py-7 sm:px-4 sm:py-16" aria-labelledby="error-title">
       <div className="overflow-hidden rounded-3xl border border-blue-950/10 bg-white shadow-xl shadow-blue-950/5">
@@ -23,8 +37,8 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
         <div className="px-6 py-7 sm:px-10 sm:py-8">
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button variant="gold" size="lg" onClick={reset} className="bg-[#ffd34e] font-bold text-blue-950 hover:bg-[#ffe078] focus-visible:outline-blue-800">
-              <RefreshCw className="h-4 w-4" /> Try again
+            <Button variant="gold" size="lg" disabled={retrying} onClick={() => startRetry(reset)} className="bg-[#ffd34e] font-bold text-blue-950 hover:bg-[#ffe078] focus-visible:outline-blue-800">
+              <RefreshCw className={`h-4 w-4 ${retrying ? "animate-spin" : ""}`} /> {retrying ? "Retrying…" : "Try again"}
             </Button>
             <Link href="/products" className={buttonVariants({ variant: "outline", size: "lg", className: "border-blue-200 text-blue-950 hover:bg-blue-50" })}>
               <ShoppingBag className="h-4 w-4" /> Browse products
@@ -35,7 +49,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
           {process.env.NODE_ENV !== "production" ? (
             <details className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
               <summary className="cursor-pointer text-xs font-semibold text-slate-600">Developer error details</summary>
-              <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs text-slate-700">{error.message}</pre>
+              <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs text-slate-700">{error.message}{error.digest ? `\nDigest: ${error.digest}` : ""}</pre>
             </details>
           ) : null}
         </div>

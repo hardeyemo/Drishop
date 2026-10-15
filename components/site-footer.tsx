@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Heart, ShieldCheck, ShoppingBag } from "lucide-react";
 import { getCategories } from "@/lib/data/catalog";
 import { SITE_NAME } from "@/lib/site-config";
+import { SupportContact } from "@/components/support-contact";
 
 export async function SiteFooter() {
   const categories = await getCategories().catch(() => []);
@@ -60,8 +61,14 @@ export async function SiteFooter() {
               <li><Link href="/account/wishlist" className="inline-flex items-center gap-2 transition-colors hover:text-emerald-800"><Heart className="h-4 w-4" /> Wishlist</Link></li>
               <li><Link href="/checkout" className="transition-colors hover:text-emerald-800">Secure checkout</Link></li>
               <li><Link href="/login" className="transition-colors hover:text-emerald-800">Sign in or create account</Link></li>
+              <li><Link href="/contact" className="transition-colors hover:text-emerald-800">Contact Us</Link></li>
+              <li><Link href="/help" className="transition-colors hover:text-emerald-800">Help / FAQ</Link></li>
             </ul>
           </nav>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 pb-8 lg:px-8">
+          <SupportContact compact />
         </div>
 
         <div className="border-t border-emerald-950/10 bg-[#e5f0e9]">

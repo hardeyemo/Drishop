@@ -4,6 +4,7 @@ import { getCategories, listProducts, SORT_OPTIONS, type ListParams } from "@/li
 import { ProductGrid } from "@/components/product-card";
 import { Pagination } from "@/components/pagination";
 import { EmptyState } from "@/components/empty-state";
+import { FridayDealsBanner } from "@/components/friday-deals-banner";
 
 export const metadata: Metadata = { title: "All products" };
 
@@ -69,6 +70,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="mx-auto max-w-7xl px-3 py-7 sm:px-5 sm:py-9 lg:px-8 lg:py-10">
+      <div className="mb-6"><FridayDealsBanner compact /></div>
       <h1 className="break-words font-display text-2xl font-extrabold tracking-tight sm:text-4xl">{heading}</h1>
       <p className="mt-2 text-sm text-neutral-600" aria-live="polite">
         {result.total} {result.total === 1 ? "product" : "products"}
@@ -77,7 +79,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       <div className="mt-6 sm:mt-8">
         {result.products.length > 0 ? (
           <>
-            <ProductGrid products={result.products} priorityCount={4} />
+            <ProductGrid products={result.products} priorityCount={4} returnTo={hrefFor(params, params.page)} />
             <Pagination
               page={result.page}
               totalPages={result.totalPages}

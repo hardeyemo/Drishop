@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:checkout": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/checkout-quote-validation.test.mjs",
+    "test:locations": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/nigeria-location-dataset.test.mjs"
   },
   "dependencies": {
+    "@countrystatecity/countries": "^2.0.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
     "class-variance-authority": "^0.7.1",

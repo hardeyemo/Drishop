@@ -19,7 +19,7 @@ The storefront includes search, category and price filters, wishlist controls, c
 
 1. `npm install`
 2. Create a Supabase project. In **SQL Editor**, run in order:
-   `supabase/migrations/0001_schema.sql`, `0002_rls.sql`, `0003_checkout.sql`, `0004_paystack_email_admin.sql`, `0005_carts.sql`, then `supabase/seed.sql`.
+   `supabase/migrations/0001_schema.sql`, `0002_rls.sql`, `0003_checkout.sql`, `0004_paystack_email_admin.sql`, `0005_carts.sql`, `0006_account_features.sql`, `0007_first_order_free_delivery.sql`, `0008_minimum_cart_subtotal.sql`, `0009_friday_crazy_deals.sql`, then `supabase/seed.sql`.
 3. `cp .env.example .env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
    `SUPABASE_SERVICE_ROLE_KEY` (Project Settings > API). The service-role key is server only.
 4. `npm run dev` and open http://localhost:3000.
@@ -91,3 +91,17 @@ The admin dashboard (Phase 6) will handle uploads.
 - The price quote on the checkout page calls the same function in dry-run mode, so the screen and the order can't disagree.
 - Sample codes (dev seed): `WELCOME10` (10% off), `SAVE5000` (₦5,000 off orders of ₦25,000+).
 - Known gap: discount-code and quote requests aren't rate-limited yet.
+
+## First-order delivery offer
+
+- `0007_first_order_free_delivery.sql` adds free delivery to the first pending checkout for a customer with no successful order history.
+- `0009_friday_crazy_deals.sql` adds an optional lower promotional price per variant. Configure only real offer prices; server checkout applies them only Friday 01:00–02:00 Africa/Lagos.
+
+Friday offer prices are optional and are not seeded. Set `product_variants.friday_deal_price_kobo` only for variants with a confirmed promotional price; the database constraint requires it to be lower than the regular price.
+- The database serializes checkouts per customer. A duplicate submission returns the same order, while another pending checkout cannot reserve the offer a second time.
+- Payment confirmation consumes the offer. A cancelled or expired order does not; a failed or unpaid pending order temporarily holds the offer until retry, cancellation, or expiry.
+- Existing shipping-zone fees and `FREE_SHIPPING_THRESHOLD_KOBO` remain authoritative for every other order.
+
+## Checkout location data
+
+Checkout city suggestions use `@countrystatecity/countries`, sourced from the CountryStateCity database and licensed under ODbL-1.0. The API loads suggestions for the selected Nigerian state; customers can still enter a town missing from the dataset.

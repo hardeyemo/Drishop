@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { FREE_SHIPPING_THRESHOLD_KOBO, RESERVATION_MINUTES } from "@/lib/site-config";
 import { formatNaira } from "@/lib/format";
 import type { Quote } from "@/lib/checkout/types";
+import { consolidateQuoteItems, verifyQuoteResult, type QuoteRpcResult } from "@/lib/checkout/quote-validation";
 
 export class CheckoutError extends Error {
   constructor(
@@ -16,28 +17,10 @@ export class CheckoutError extends Error {
   }
 }
 
-type RpcLine = {
-  variant_id: string;
-  product_id: string;
-  slug: string;
-  product_name: string;
-  variant_name: string | null;
-  sku: string;
-  unit_price_kobo: number;
-  quantity: number;
-  line_total_kobo: number;
-  stock: number;
-};
-
-type RpcResult = {
+type RpcResult = QuoteRpcResult & {
   order_id?: string;
   order_number?: string;
   existing?: boolean;
-  lines?: RpcLine[];
-  subtotal_kobo?: number;
-  discount_kobo?: number;
-  shipping_kobo?: number | null;
-  total_kobo?: number;
 };
 
 type CallArgs = {
@@ -72,6 +55,8 @@ async function toCheckoutError(
       return new CheckoutError("EMPTY_CART", "Your cart is empty.");
     case "CART_TOO_LARGE":
       return new CheckoutError("CART_TOO_LARGE", "Your cart is too large to check out in one order. Remove some items.");
+    case "MINIMUM_CART_SUBTOTAL":
+      return new CheckoutError("MINIMUM_CART_SUBTOTAL", "Your merchandise subtotal must be at least ₦10,000 to check out.");
     case "INVALID_QUANTITY":
       return new CheckoutError("INVALID_QUANTITY", "One of your items has an invalid quantity. Update your cart.", "cart", detail);
     case "ITEM_UNAVAILABLE":
@@ -98,6 +83,8 @@ async function toCheckoutError(
     }
     case "SHIPPING_UNAVAILABLE":
       return new CheckoutError("SHIPPING_UNAVAILABLE", "We don't deliver to that state yet.", "shipping");
+    case "FIRST_ORDER_OFFER_RESERVED":
+      return new CheckoutError("FIRST_ORDER_OFFER_RESERVED", `Your free-delivery offer is reserved for a pending order${detail ? ` ${detail}` : ""}. Complete or cancel that order before starting another checkout.`, "cart");
     case "INVALID_ADDRESS":
       return new CheckoutError("INVALID_ADDRESS", "Check your delivery details and try again.", "address");
     default:
@@ -139,41 +126,18 @@ async function callCreateOrder(args: CallArgs, dryRun: boolean): Promise<RpcResu
 
 /** Authoritative prices, stock check, discount and shipping. Writes nothing. */
 export async function priceCart(args: Omit<CallArgs, "address" | "notes" | "idempotencyKey"> & { state?: string }): Promise<Quote> {
-  const res = await callCreateOrder({ ...args, address: args.state ? { state: args.state } : {} }, true);
-  const lines = res.lines;
-  const integer = (value: unknown): value is number => Number.isSafeInteger(value) && (value as number) >= 0;
-  if (!Array.isArray(lines) || lines.length !== args.items.length
-      || !integer(res.subtotal_kobo) || !integer(res.discount_kobo)
-      || !(res.shipping_kobo === null || integer(res.shipping_kobo)) || !integer(res.total_kobo)) {
+  const requestedItems = consolidateQuoteItems(args.items);
+  const res = await callCreateOrder({ ...args, items: requestedItems, address: args.state ? { state: args.state } : {} }, true);
+  const verification = verifyQuoteResult(res, requestedItems, Boolean(args.state));
+  if (!verification.quote) {
+    console.error("[checkout] Server quote failed integrity verification", {
+      reason: verification.reason,
+      requestedLineCount: requestedItems.length,
+      returnedLineCount: Array.isArray(res.lines) ? res.lines.length : null,
+    });
     throw new CheckoutError("INVALID_QUOTE", "We couldn't verify current prices. Please refresh checkout.");
   }
-  const normalized = lines.map((l) => ({
-      variantId: l.variant_id,
-      productId: l.product_id,
-      slug: l.slug,
-      productName: l.product_name,
-      variantName: l.variant_name,
-      sku: l.sku,
-      unitPriceKobo: l.unit_price_kobo,
-      quantity: l.quantity,
-      lineTotalKobo: l.line_total_kobo,
-      stock: l.stock,
-    }));
-  const validLines = normalized.every((line) => Number.isSafeInteger(line.unitPriceKobo) && line.unitPriceKobo > 0
-    && Number.isSafeInteger(line.quantity) && line.quantity > 0
-    && Number.isSafeInteger(line.lineTotalKobo) && line.lineTotalKobo === line.unitPriceKobo * line.quantity
-    && Number.isSafeInteger(line.stock) && line.stock >= line.quantity
-    && args.items.some((item) => item.variantId === line.variantId && item.quantity === line.quantity));
-  const subtotal = res.subtotal_kobo;
-  const discount = res.discount_kobo;
-  const shipping = res.shipping_kobo;
-  const total = res.total_kobo;
-  if (!validLines || normalized.reduce((sum, line) => sum + line.lineTotalKobo, 0) !== subtotal
-      || discount > subtotal || (args.state ? shipping === null : shipping !== null)
-      || total !== subtotal - discount + (shipping ?? 0)) {
-    throw new CheckoutError("INVALID_QUOTE", "We couldn't verify current prices. Please refresh checkout.");
-  }
-  return { lines: normalized, subtotalKobo: subtotal, discountKobo: discount, shippingKobo: shipping, totalKobo: total };
+  return verification.quote;
 }
 
 /** Creates the order and reserves stock atomically. */

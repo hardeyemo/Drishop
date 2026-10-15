@@ -11,8 +11,11 @@ import { EmptyState } from "@/components/empty-state";
 import { placeOrder, quoteCheckout } from "@/app/actions/checkout";
 import { formatNaira } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD_KOBO } from "@/lib/site-config";
+import { MIN_CART_SUBTOTAL_KOBO } from "@/lib/site-config";
 import type { AddressInput, Quote } from "@/lib/checkout/types";
 import { NIGERIAN_STATES, NIGERIAN_STATE_SET } from "@/lib/nigeria";
+import { FirstOrderOffer } from "@/components/first-order-offer";
+import { SupportContact } from "@/components/support-contact";
 
 export type Zone = { state: string; feeKobo: number };
 export type SavedAddress = {
@@ -26,7 +29,7 @@ export type SavedAddress = {
   state: string;
 };
 
-type Problem = { message: string; variantId?: string };
+type Problem = { message: string; variantId?: string; offerReserved?: boolean };
 
 const selectCls =
   "h-12 w-full rounded-md border border-ink/20 bg-white px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-deep sm:h-11 sm:text-sm";
@@ -53,6 +56,8 @@ export function CheckoutForm({
     city: first?.city ?? "",
     state: first && NIGERIAN_STATE_SET.has(first.state) ? first.state : "",
   });
+  const [cities, setCities] = React.useState<string[]>([]);
+  const [citiesLoading, setCitiesLoading] = React.useState(false);
   const [notes, setNotes] = React.useState("");
   const [saveAddress, setSaveAddress] = React.useState(addresses.length === 0);
 
@@ -75,6 +80,32 @@ export function CheckoutForm({
   );
   const requestId = React.useRef(0);
 
+  React.useEffect(() => {
+    if (!addr.state) {
+      setCities([]);
+      setCitiesLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setCitiesLoading(true);
+    fetch(`/api/locations/cities?state=${encodeURIComponent(addr.state)}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("City lookup unavailable");
+        return response.json() as Promise<{ cities?: unknown }>;
+      })
+      .then((result) => setCities(Array.isArray(result.cities)
+        ? result.cities.filter((city): city is string => typeof city === "string")
+        : []))
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name === "AbortError") return;
+        setCities([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCitiesLoading(false);
+      });
+    return () => controller.abort();
+  }, [addr.state]);
+
   // Ask the server for authoritative prices whenever the cart, state or code changes.
   React.useEffect(() => {
     if (!hydrated || lineInputs.length === 0 || placed) return;
@@ -92,7 +123,7 @@ export function CheckoutForm({
           setDiscountError(res.error);
           setAppliedCode("");
         } else {
-          setProblem({ message: res.error, variantId: res.variantId });
+          setProblem({ message: res.error, variantId: res.variantId, offerReserved: res.offerReserved });
           setQuote(null);
         }
       })
@@ -101,7 +132,7 @@ export function CheckoutForm({
         setPricing(false);
         setProblem({ message: "We couldn't refresh your prices. Check your connection and reload." });
       });
-  }, [hydrated, lineInputs, addr.state, addr.city, appliedCode, placed]);
+  }, [hydrated, lineInputs, addr.state, appliedCode, placed]);
 
   function set<K extends keyof AddressInput>(key: K, value: AddressInput[K]) {
     setAddr((a) => ({ ...a, [key]: value }));
@@ -159,7 +190,8 @@ export function CheckoutForm({
         return;
       }
       if ("fieldErrors" in res && res.fieldErrors) setFieldErrors(res.fieldErrors);
-      setSubmitError({ message: res.error, variantId: "variantId" in res ? res.variantId : undefined });
+      setSubmitError({ message: res.error, variantId: "variantId" in res ? res.variantId : undefined,
+        offerReserved: "offerReserved" in res ? res.offerReserved : undefined });
     });
   }
 
@@ -185,10 +217,12 @@ export function CheckoutForm({
   }
 
   const blocking = problem ?? null;
-  const canSubmit = Boolean(quote && Number.isSafeInteger(quote.totalKobo) && quote.totalKobo >= 0
+  const merchandiseSubtotalKobo = quote?.subtotalKobo ?? items.reduce((sum, item) => sum + item.priceKobo * item.quantity, 0);
+  const amountToMinimum = Math.max(0, MIN_CART_SUBTOTAL_KOBO - merchandiseSubtotalKobo);
+  const belowMinimum = merchandiseSubtotalKobo < MIN_CART_SUBTOTAL_KOBO;
+  const canSubmit = !belowMinimum && Boolean(quote && Number.isSafeInteger(quote.totalKobo) && quote.totalKobo >= 0
     && quote.shippingKobo !== null) && !blocking && !pricing && Boolean(addr.state && addr.city.trim()) && !submitting;
   const zoneFee = zones.find((z) => z.state.toLowerCase() === addr.state.toLowerCase())?.feeKobo;
-  const selectedState = NIGERIAN_STATES.find((state) => state.value === addr.state);
   const cityListId = "checkout-city-options";
 
   return (
@@ -222,17 +256,6 @@ export function CheckoutForm({
             onChange={(e) => set("line2", e.target.value)} error={fieldErrors.line2?.[0]} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="city" className="mb-1.5 block text-sm font-medium">City or town</label>
-              <input id="city" list={cityListId} autoComplete="address-level2" required minLength={2} maxLength={60}
-                value={addr.city} onChange={(e) => set("city", e.target.value)}
-                aria-invalid={fieldErrors.city ? true : undefined} className={selectCls} />
-              <datalist id={cityListId}>
-                {(selectedState?.towns ?? []).map((town) => <option key={town} value={town} />)}
-              </datalist>
-              <p className="mt-1 text-xs text-neutral-500">Search suggestions or enter another town.</p>
-              {fieldErrors.city?.[0] ? <p className="mt-1 text-xs text-red-700">{fieldErrors.city[0]}</p> : null}
-            </div>
-            <div>
               <label htmlFor="state" className="mb-1.5 block text-sm font-medium">State</label>
               <select id="state" required value={addr.state} onChange={(e) => {
                 setAddr((current) => ({ ...current, state: e.target.value, city: "" }));
@@ -254,6 +277,19 @@ export function CheckoutForm({
                 <p className="mt-1 text-xs text-neutral-500">Configured delivery rate for {addr.state}: {formatNaira(zoneFee)}. Your final delivery fee is shown below.</p>
               ) : null}
             </div>
+            <div>
+              <label htmlFor="city" className="mb-1.5 block text-sm font-medium">City or town</label>
+              <input id="city" list={cityListId} autoComplete="address-level2" required minLength={2} maxLength={60}
+                disabled={!addr.state} value={addr.city} onChange={(e) => set("city", e.target.value)}
+                aria-invalid={fieldErrors.city ? true : undefined} aria-describedby="city-help" className={`${selectCls} disabled:cursor-not-allowed disabled:bg-neutral-100`} />
+              <datalist id={cityListId}>
+                {cities.map((city) => <option key={city} value={city} />)}
+              </datalist>
+              <p id="city-help" className="mt-1 text-xs text-neutral-500" role="status">
+                {!addr.state ? "Choose a state first." : citiesLoading ? "Loading city suggestions…" : cities.length ? "Search and select a city or town, or enter another town." : "Suggestions are unavailable; you can enter your city or town."}
+              </p>
+              {fieldErrors.city?.[0] ? <p className="mt-1 text-xs text-red-700">{fieldErrors.city[0]}</p> : null}
+            </div>
           </div>
 
           <div>
@@ -271,10 +307,13 @@ export function CheckoutForm({
 
       <aside aria-labelledby="summary-heading" className="h-fit min-w-0 rounded-2xl border border-line p-4 sm:p-6 lg:sticky lg:top-40">
         <h2 id="summary-heading" className="font-display text-lg font-bold">Order summary</h2>
+        {quote?.firstOrderFreeDelivery ? <FirstOrderOffer status="eligible" className="mt-4" /> : null}
+        {problem?.offerReserved ? <FirstOrderOffer status="reserved" className="mt-4" /> : null}
 
         {blocking ? (
           <div role="alert" className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
             <p>{blocking.message}</p>
+            {blocking.offerReserved ? <Link href="/account" className="mt-2 inline-block font-medium underline underline-offset-4">View your pending orders</Link> : null}
             <Link href="/cart" className="mt-2 inline-block font-medium underline underline-offset-4">Back to your cart</Link>
           </div>
         ) : null}
@@ -362,6 +401,12 @@ export function CheckoutForm({
           </span>
         </p>
 
+        {belowMinimum ? (
+          <p className="mt-3 rounded-md bg-surface px-3 py-2 text-sm text-neutral-700" role="status" aria-live="polite">
+            Add {formatNaira(amountToMinimum)} more in merchandise to reach the ₦10,000 minimum for checkout. Delivery fees and discounts do not count toward the minimum.
+          </p>
+        ) : null}
+
         <p className="mt-2 text-xs leading-relaxed text-neutral-500">
           Your total includes the confirmed delivery fee and any discount. Payment is completed securely with Paystack after you continue.
         </p>
@@ -372,6 +417,7 @@ export function CheckoutForm({
             {submitError.variantId ? (
               <Link href="/cart" className="ml-1 font-medium underline underline-offset-4">Review cart</Link>
             ) : null}
+            {submitError.offerReserved ? <Link href="/account" className="ml-1 font-medium underline underline-offset-4">View your pending orders</Link> : null}
           </p>
         ) : null}
 
@@ -381,6 +427,7 @@ export function CheckoutForm({
         <Link href="/cart" className={buttonVariants({ variant: "ghost", size: "sm", className: "mt-2 w-full" })}>
           Back to cart
         </Link>
+        <div className="mt-4"><SupportContact compact /></div>
       </aside>
     </form>
   );

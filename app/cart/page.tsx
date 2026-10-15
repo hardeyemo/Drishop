@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
@@ -7,9 +8,20 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { ProductImage } from "@/components/product-image";
 import { EmptyState } from "@/components/empty-state";
 import { formatNaira } from "@/lib/format";
+import { CartRecentlyViewed } from "@/components/cart-recently-viewed";
+import { FirstOrderOffer } from "@/components/first-order-offer";
+import { getCurrentFirstOrderOfferStatus } from "@/app/actions/checkout";
+import type { FirstOrderOfferStatus } from "@/lib/checkout/first-order-offer";
+import { MIN_CART_SUBTOTAL_KOBO } from "@/lib/site-config";
 
 export default function CartPage() {
   const { items, hydrated, pending, error, count, subtotalKobo, setQuantity, remove } = useCart();
+  const [offerStatus, setOfferStatus] = React.useState<FirstOrderOfferStatus | null>(null);
+  const belowMinimum = subtotalKobo < MIN_CART_SUBTOTAL_KOBO;
+  const amountToMinimum = Math.max(0, MIN_CART_SUBTOTAL_KOBO - subtotalKobo);
+  React.useEffect(() => {
+    getCurrentFirstOrderOfferStatus().then(setOfferStatus).catch(() => setOfferStatus(null));
+  }, []);
 
   if (!hydrated) {
     return (
@@ -23,6 +35,7 @@ export default function CartPage() {
   return (
     <div className="mx-auto max-w-5xl px-3 py-7 sm:px-5 sm:py-9 lg:px-8 lg:py-10">
       <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Your cart</h1>
+      {offerStatus ? <FirstOrderOffer status={offerStatus} className="mt-4" /> : null}
       {error ? <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p> : null}
       {pending ? <p className="mt-3 text-xs text-neutral-500" role="status">Syncing cart…</p> : null}
 
@@ -100,15 +113,25 @@ export default function CartPage() {
               <span className="font-medium">Subtotal</span>
               <span className="font-display text-2xl font-extrabold tabular-nums">{formatNaira(subtotalKobo)}</span>
             </p>
-            <Link href="/checkout" className={buttonVariants({ variant: "gold", size: "lg", className: "mt-5 w-full" })}>
-              Checkout
-            </Link>
+            {belowMinimum ? (
+              <p className="mt-4 rounded-md bg-surface px-3 py-2 text-sm text-neutral-700" role="status" aria-live="polite">
+                Add {formatNaira(amountToMinimum)} more to reach the ₦10,000 minimum for checkout.
+              </p>
+            ) : null}
+            {belowMinimum ? (
+              <Button variant="gold" size="lg" className="mt-3 w-full" disabled aria-disabled="true">Checkout</Button>
+            ) : (
+              <Link href="/checkout" className={buttonVariants({ variant: "gold", size: "lg", className: "mt-3 w-full animate-checkout-pulse motion-reduce:animate-none" })}>
+                Checkout
+              </Link>
+            )}
             <Link href="/products" className={buttonVariants({ variant: "outline", className: "mt-2 w-full" })}>
               Continue shopping
             </Link>
           </aside>
         </div>
       )}
+      <CartRecentlyViewed />
     </div>
   );
 }

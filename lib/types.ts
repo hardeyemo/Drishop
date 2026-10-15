@@ -20,10 +20,11 @@ export type ProductCardData = {
   imageAlt: string | null;
   categoryName: string | null;
   description: string | null;
+  fridayDeal: boolean;
   variants: ProductCardVariant[];
 };
 
-export type ProductCardVariant = Pick<Variant, "id" | "name" | "priceKobo" | "stock">;
+export type ProductCardVariant = Pick<Variant, "id" | "name" | "priceKobo" | "stock" | "fridayDeal">;
 
 export type Variant = {
   id: string;
@@ -32,6 +33,7 @@ export type Variant = {
   priceKobo: number;
   compareAtKobo: number | null;
   stock: number;
+  fridayDeal: boolean;
 };
 
 export type ProductDetail = Omit<ProductCardData, "variants"> & {

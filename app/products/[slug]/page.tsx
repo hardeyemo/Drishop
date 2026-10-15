@@ -10,8 +10,13 @@ import { ProductPurchase } from "@/components/product-purchase";
 import { ProductGrid } from "@/components/product-card";
 import { RatingStars } from "@/components/rating-stars";
 import { SectionHeader } from "@/components/section-header";
+import { safeNext } from "@/lib/safe-redirect";
+import { RecentlyViewed } from "@/components/recently-viewed";
+import { FirstOrderOffer } from "@/components/first-order-offer";
+import { getFirstOrderOfferStatus } from "@/lib/checkout/first-order-offer";
+import { FridayDealsBanner } from "@/components/friday-deals-banner";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ from?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -23,12 +28,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
-  const { slug } = await params;
+export default async function ProductPage({ params, searchParams }: Props) {
+  const [{ slug }, sp] = await Promise.all([params, searchParams]);
+  const candidate = safeNext(sp.from, "/products");
+  const returnTo = candidate === "/products" || candidate.startsWith("/products?") ? candidate : "/products";
   const product = await getProductBySlug(slug);
   if (!product) notFound();
   const [related, user] = await Promise.all([getRelatedProducts(product.categorySlug, product.id), getUser()]);
   const saved = user ? await isWishlisted(user.id, product.id) : false;
+  const offerStatus = await getFirstOrderOfferStatus(user?.id);
 
   return (
     <div className="mx-auto max-w-7xl px-3 py-6 sm:px-5 sm:py-8 lg:px-8">
@@ -60,9 +68,11 @@ export default async function ProductPage({ params }: Props) {
           <div className="mt-3">
             <RatingStars value={product.ratingAvg} count={product.ratingCount} />
           </div>
+          <FirstOrderOffer status={offerStatus} className="mt-5" />
+          {product.fridayDeal ? <div className="mt-4"><FridayDealsBanner compact /></div> : null}
           <div className="mt-6 border-t border-line pt-6">
             {/* Remount when the product changes so variant/quantity state resets. */}
-            <ProductPurchase key={product.id} product={product} />
+            <ProductPurchase key={product.id} product={product} returnTo={returnTo} />
             <div className="mt-4">
               <WishlistButton
                 productId={product.id}
@@ -87,6 +97,7 @@ export default async function ProductPage({ params }: Props) {
           <ProductGrid products={related} />
         </section>
       ) : null}
+      <RecentlyViewed product={{ slug: product.slug, name: product.name, imageUrl: product.imageUrl, imageAlt: product.imageAlt, priceKobo: product.minPriceKobo }} />
     </div>
   );
 }

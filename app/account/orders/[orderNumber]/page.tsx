@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatNaira } from "@/lib/format";
 import { CancelOrderButton } from "@/components/checkout/cancel-order-button";
 import { PayNowButton } from "@/components/checkout/pay-now-button";
+import { SupportContact } from "@/components/support-contact";
 
 type Props = { params: Promise<{ orderNumber: string }> };
 
@@ -104,6 +105,7 @@ export default async function OrderPage({ params }: Props) {
           {a.phone}
         </address>
       </div>
+      <div className="mt-7"><SupportContact compact /></div>
     </section>
   );
 }

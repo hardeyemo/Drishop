@@ -7,6 +7,12 @@ import { getUser } from "@/lib/auth";
 import { CheckoutError, cancelUnpaidOrder, createOrder, priceCart } from "@/lib/checkout/service";
 import type { PlaceOrderResult, QuoteResult } from "@/lib/checkout/types";
 import { placeOrderSchema, quoteSchema } from "@/lib/validation/checkout";
+import { getFirstOrderOfferStatus, type FirstOrderOfferStatus } from "@/lib/checkout/first-order-offer";
+
+export async function getCurrentFirstOrderOfferStatus(): Promise<FirstOrderOfferStatus> {
+  const user = await getUser();
+  return getFirstOrderOfferStatus(user?.id);
+}
 
 function fieldErrorsFrom(error: ZodError) {
   const out: Record<string, string[]> = {};
@@ -35,7 +41,8 @@ export async function quoteCheckout(input: unknown): Promise<QuoteResult> {
     });
     return { ok: true, quote };
   } catch (e) {
-    if (e instanceof CheckoutError) return { ok: false, error: e.message, field: e.field, variantId: e.variantId };
+    if (e instanceof CheckoutError) return { ok: false, error: e.message, field: e.field, variantId: e.variantId,
+      offerReserved: e.code === "FIRST_ORDER_OFFER_RESERVED" };
     console.error("quoteCheckout failed during session or price lookup:", e instanceof Error ? e.name : "Unknown server error");
     return { ok: false, error: "We couldn't verify prices right now. Please retry in a moment.", field: "cart" };
   }
@@ -77,7 +84,8 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
     });
     orderNumber = order.orderNumber;
   } catch (e) {
-    if (e instanceof CheckoutError) return { ok: false, error: e.message, field: e.field, variantId: e.variantId };
+    if (e instanceof CheckoutError) return { ok: false, error: e.message, field: e.field, variantId: e.variantId,
+      offerReserved: e.code === "FIRST_ORDER_OFFER_RESERVED" };
     console.error("placeOrder failed", e);
     return { ok: false, error: "Something went wrong. Please try again.", field: "cart" };
   }
