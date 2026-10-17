@@ -20,7 +20,7 @@ The storefront includes search, category and price filters, wishlist controls, c
 1. `npm install`
 2. Create a Supabase project. In **SQL Editor**, run in order:
    `supabase/migrations/0001_schema.sql`, `0002_rls.sql`, `0003_checkout.sql`, `0004_paystack_email_admin.sql`, `0005_carts.sql`, `0006_account_features.sql`, `0007_first_order_free_delivery.sql`, `0008_minimum_cart_subtotal.sql`, `0009_friday_crazy_deals.sql`, then `supabase/seed.sql`.
-3. `cp .env.example .env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
+3. In PowerShell, run `Copy-Item .env.example .env.local` (or use `cp .env.example .env.local` in a Unix shell), then fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
    `SUPABASE_SERVICE_ROLE_KEY` (Project Settings > API). The service-role key is server only.
 4. `npm run dev` and open http://localhost:3000.
 5. Run `npm run typecheck` and `npm run build`. Fix anything they report before building on top.
