@@ -48,6 +48,7 @@ export type PlaceOrderInput = {
   discountCode?: string;
   notes?: string;
   saveAddress: boolean;
+  acceptedTerms: true;
   idempotencyKey: string;
 };
 

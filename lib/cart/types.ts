@@ -6,6 +6,7 @@ export type CartItem = {
   variantName: string | null;
   priceKobo: number; // Display only. Checkout always reads the current database price.
   imageUrl: string | null;
+  categorySlug?: string | null;
   quantity: number;
   maxQuantity: number;
   availableStock: number;

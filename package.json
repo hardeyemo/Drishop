@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test:checkout": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/checkout-quote-validation.test.mjs",
-    "test:locations": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/nigeria-location-dataset.test.mjs"
+    "test:locations": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/nigeria-location-dataset.test.mjs",
+    "test:navigation": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/department-navigation.test.mjs"
   },
   "dependencies": {
     "@countrystatecity/countries": "^2.0.0",

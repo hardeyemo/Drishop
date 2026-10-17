@@ -14,7 +14,9 @@ export async function POST(request: Request) {
   if (providedBuffer.length !== expectedBuffer.length || !timingSafeEqual(providedBuffer, expectedBuffer)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
-  const event = JSON.parse(raw) as { event?: string; data?: { id?: number; reference?: string; status?: string; amount?: number; currency?: string } };
+  let event: { event?: string; data?: { id?: number; reference?: string; status?: string; amount?: number; currency?: string } };
+  try { event = JSON.parse(raw); }
+  catch { return NextResponse.json({ error: "Invalid event payload" }, { status: 400 }); }
   if (event.event !== "charge.success" || !event.data?.reference || !event.data.id) return NextResponse.json({ received: true });
 
   const db = createAdminClient();

@@ -60,6 +60,7 @@ export function CheckoutForm({
   const [citiesLoading, setCitiesLoading] = React.useState(false);
   const [notes, setNotes] = React.useState("");
   const [saveAddress, setSaveAddress] = React.useState(addresses.length === 0);
+  const [acceptedTerms, setAcceptedTerms] = React.useState(false);
 
   const [codeInput, setCodeInput] = React.useState("");
   const [appliedCode, setAppliedCode] = React.useState("");
@@ -169,6 +170,7 @@ export function CheckoutForm({
         discountCode: appliedCode || undefined,
         notes: notes || undefined,
         saveAddress,
+        acceptedTerms: acceptedTerms as true,
         idempotencyKey,
       });
       if (res.ok) {
@@ -221,7 +223,7 @@ export function CheckoutForm({
   const amountToMinimum = Math.max(0, MIN_CART_SUBTOTAL_KOBO - merchandiseSubtotalKobo);
   const belowMinimum = merchandiseSubtotalKobo < MIN_CART_SUBTOTAL_KOBO;
   const canSubmit = !belowMinimum && Boolean(quote && Number.isSafeInteger(quote.totalKobo) && quote.totalKobo >= 0
-    && quote.shippingKobo !== null) && !blocking && !pricing && Boolean(addr.state && addr.city.trim()) && !submitting;
+    && quote.shippingKobo !== null) && !blocking && !pricing && Boolean(addr.state && addr.city.trim()) && acceptedTerms && !submitting;
   const zoneFee = zones.find((z) => z.state.toLowerCase() === addr.state.toLowerCase())?.feeKobo;
   const cityListId = "checkout-city-options";
 
@@ -410,6 +412,11 @@ export function CheckoutForm({
         <p className="mt-2 text-xs leading-relaxed text-neutral-500">
           Your total includes the confirmed delivery fee and any discount. Payment is completed securely with Paystack after you continue.
         </p>
+
+        <label className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-neutral-600">
+          <input type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-800" />
+          <span>I agree to the <Link href="/terms" target="_blank" className="font-semibold text-emerald-800 underline">Terms and Conditions</Link>.</span>
+        </label>
 
         {submitError ? (
           <p role="alert" className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">

@@ -1,20 +1,31 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Plus } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Plus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import type { ProductCardData, ProductCardVariant } from "@/lib/types";
 
 export function ProductCardAction({ product }: { product: ProductCardData }) {
-  const { add, pending } = useCart();
+  const { add, pending, items } = useCart();
   const [added, setAdded] = React.useState(false);
   const [error, setError] = React.useState("");
   const availableVariants = product.variants.filter((variant) => variant.stock > 0);
   const [variantId, setVariantId] = React.useState(availableVariants[0]?.id ?? "");
   const variant = availableVariants.find((entry) => entry.id === variantId) ?? availableVariants[0];
+  const productCount = items.reduce((total, item) => total + (item.productId === product.id ? item.quantity : 0), 0);
+  const cartIndicator = (
+    <Link href="/cart" aria-label={productCount ? `${product.name}: ${productCount} in cart. View cart` : `View cart; ${product.name} is not in your cart`} title={productCount ? `${productCount} in cart` : "View cart"} className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 ${productCount ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100" : "border-slate-200 bg-white text-slate-500 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800"}`}>
+      <ShoppingCart aria-hidden="true" className="h-[18px] w-[18px]" />
+      {productCount > 0 ? <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ffd34e] px-1 text-[10px] font-extrabold leading-none text-emerald-950">{productCount > 99 ? "99+" : productCount}</span> : null}
+    </Link>
+  );
 
   if (product.totalStock <= 0 || availableVariants.length === 0 || !variant) {
-    return <button type="button" disabled aria-label={`Out of stock: ${product.name}`} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-400"><Plus className="h-4 w-4" /></button>;
+    return <div className="flex shrink-0 items-center gap-1.5">
+      <button type="button" disabled aria-label={`Out of stock: ${product.name}`} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-400"><Plus className="h-4 w-4" /></button>
+      {cartIndicator}
+    </div>;
   }
 
   async function onAdd(selected: ProductCardVariant) {
@@ -29,6 +40,7 @@ export function ProductCardAction({ product }: { product: ProductCardData }) {
       variantName: product.variants.length > 1 ? selected.name : null,
       priceKobo: selected.priceKobo,
       imageUrl: product.imageUrl,
+      categorySlug: product.categorySlug,
       maxQuantity: Math.min(selected.stock, 10),
       availableStock: selected.stock,
     }, 1);
@@ -59,6 +71,7 @@ export function ProductCardAction({ product }: { product: ProductCardData }) {
       <button type="button" aria-label={`${added ? "Added" : "Add"} ${product.name} to cart`} title={added ? "Added to cart" : "Add to cart"} disabled={pending} onClick={() => void onAdd(variant)} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#174fc9] text-white shadow-sm transition-colors hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 disabled:cursor-wait disabled:opacity-70">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
       </button>
+      {cartIndicator}
       <span aria-live="polite" className="sr-only">{added ? "Added to cart." : error}</span>
     </div>
   );

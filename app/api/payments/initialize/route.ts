@@ -38,14 +38,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payment could not be prepared. Please retry." }, { status: 500 });
   }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
-  const response = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ email: user.email, amount: order.total_kobo, currency: order.currency, reference,
-      callback_url: `${siteUrl}/api/payments/verify` }),
-    cache: "no-store",
-  });
-  const result = await response.json().catch(() => null);
+  let response: Response;
+  let result: { status?: boolean; message?: string; data?: { authorization_url?: string } } | null;
+  try {
+    response = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: user.email, amount: order.total_kobo, currency: order.currency, reference,
+        callback_url: `${siteUrl}/api/payments/verify` }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
+    result = await response.json().catch(() => null);
+  } catch (error) {
+    console.error("Paystack initialization request failed", error instanceof Error ? error.name : "Unknown error");
+    await admin.from("payments").update({ status: "failed" }).eq("reference", reference).eq("status", "initialized");
+    return NextResponse.json({ error: "Paystack could not be reached. Please retry payment from your order." }, { status: 502 });
+  }
   if (!response.ok || !result?.status || !result.data?.authorization_url) {
     console.error("Paystack initialization failed", result?.message ?? response.status);
     await admin.from("payments").update({ status: "failed" }).eq("reference", reference);
@@ -56,6 +65,7 @@ export async function POST(request: Request) {
     .eq("reference", reference).eq("status", "initialized");
   if (error) {
     console.error("Could not save Paystack reference", error);
+    await admin.from("payments").update({ status: "failed" }).eq("reference", reference).eq("status", "initialized");
     return NextResponse.json({ error: "Payment could not be prepared. Please retry." }, { status: 500 });
   }
   return NextResponse.json({ authorizationUrl: result.data.authorization_url });

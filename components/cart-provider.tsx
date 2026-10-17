@@ -25,6 +25,7 @@ type CartContextValue = {
 type CartMode = "loading" | "local" | "account";
 const STORAGE_KEY = "drishop-cart-v1";
 const LEGACY_STORAGE_KEY = "shopora-cart-v1";
+const ACCOUNT_SYNC_KEY = "drishop-cart-sync-v1";
 const CartContext = React.createContext<CartContextValue | null>(null);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -125,6 +126,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key === STORAGE_KEY && mode === "local") setItems(readGuestCart());
+      if (event.key === ACCOUNT_SYNC_KEY && mode === "account") {
+        void loadCart([]).then((result) => {
+          if (result.ok && result.authenticated) setItems(result.items);
+        });
+      }
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
@@ -137,6 +143,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return { ok: false, error: result.error };
       }
       setItems(result.items);
+      try { window.localStorage.setItem(ACCOUNT_SYNC_KEY, String(Date.now())); } catch { /* cross-tab refresh is best effort */ }
       setError(result.warning ?? null);
       return { ok: true };
     }
@@ -219,6 +226,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (mode === "account") {
           const result = await clearSavedCart();
           if (!result.ok) setError(result.error ?? "Your cart could not be cleared from your account.");
+          else try { window.localStorage.setItem(ACCOUNT_SYNC_KEY, String(Date.now())); } catch { /* cross-tab refresh is best effort */ }
         }
       },
     };

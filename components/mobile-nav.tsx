@@ -2,17 +2,37 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { Category } from "@/lib/types";
+import { resolveActiveDepartment } from "@/lib/data/active-department";
 import { Menu, X } from "lucide-react";
 
-type Item = { name: string; slug: string };
+type Item = Pick<Category, "id" | "name" | "slug" | "parentId" | "description">;
 type TouchStart = { y: number; time: number };
 
 export function MobileNav({ categories, signedIn, buttonClassName = "" }: { categories: Item[]; signedIn: boolean; buttonClassName?: string }) {
+  const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const [activeKey, setActiveKey] = React.useState<string | null>(null);
   const [dragY, setDragY] = React.useState(0);
   const panelRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const touchStart = React.useRef<TouchStart | null>(null);
+
+  React.useEffect(() => {
+    const syncActive = () => {
+      setActiveKey(resolveActiveDepartment(window.location.pathname, window.location.search, categories));
+    };
+    syncActive();
+    window.addEventListener("popstate", syncActive);
+    return () => window.removeEventListener("popstate", syncActive);
+  }, [categories, pathname]);
+
+  function departmentFor(slug: string) {
+    let category = categories.find((entry) => entry.slug === slug);
+    while (category?.parentId) category = categories.find((entry) => entry.id === category?.parentId);
+    return category?.slug ?? slug;
+  }
 
   const close = React.useCallback(() => {
     setOpen(false);
@@ -174,7 +194,7 @@ export function MobileNav({ categories, signedIn, buttonClassName = "" }: { cate
                 </Link>
               </li>
               <li>
-                <Link href="/products?deals=1" onClick={close} className="flex min-h-12 items-center py-3 text-sm font-bold text-amber-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800">
+                <Link href="/products?deals=1" onClick={() => { setActiveKey("deals"); close(); }} aria-current={activeKey === "deals" ? "page" : undefined} className={`flex min-h-12 items-center rounded-lg px-2 py-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800 ${activeKey === "deals" ? "bg-[#ffd34e] text-emerald-950" : "text-amber-800"}`}>
                   Deals
                 </Link>
               </li>
@@ -187,8 +207,9 @@ export function MobileNav({ categories, signedIn, buttonClassName = "" }: { cate
                 <li key={category.slug}>
                   <Link
                     href={`/products?category=${category.slug}`}
-                    onClick={close}
-                    className="flex min-h-12 items-center py-3 text-sm text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800"
+                    onClick={() => { setActiveKey(departmentFor(category.slug)); close(); }}
+                    aria-current={activeKey === departmentFor(category.slug) ? "page" : undefined}
+                    className={`flex min-h-12 items-center rounded-lg px-2 py-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800 ${activeKey === departmentFor(category.slug) ? "bg-emerald-100 font-semibold text-emerald-950" : "text-slate-700"}`}
                   >
                     {category.name}
                   </Link>

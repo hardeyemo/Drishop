@@ -19,6 +19,7 @@ export type ProductCardData = {
   imageUrl: string | null;
   imageAlt: string | null;
   categoryName: string | null;
+  categorySlug: string | null;
   description: string | null;
   fridayDeal: boolean;
   variants: ProductCardVariant[];

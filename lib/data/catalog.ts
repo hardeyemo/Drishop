@@ -42,7 +42,7 @@ export type CardRow = {
   total_stock: number;
   rating_avg: number;
   rating_count: number;
-  category: { name: string } | null;
+  category: { name: string; slug: string } | null;
   images: { url: string; alt: string | null; sort_order: number }[];
   variants: {
     id: string;
@@ -55,7 +55,7 @@ export type CardRow = {
 };
 
 export const CARD_SELECT =
-  "id,name,slug,brand,description,min_price_kobo,compare_at_kobo,total_stock,rating_avg,rating_count,category:categories(name),images:product_images(url,alt,sort_order),variants:product_variants(id,name,price_kobo,friday_deal_price_kobo,stock_quantity,is_active)";
+  "id,name,slug,brand,description,min_price_kobo,compare_at_kobo,total_stock,rating_avg,rating_count,category:categories(name,slug),images:product_images(url,alt,sort_order),variants:product_variants(id,name,price_kobo,friday_deal_price_kobo,stock_quantity,is_active)";
 const LEGACY_CARD_SELECT = CARD_SELECT.replace(",friday_deal_price_kobo", "");
 
 export function toCard(row: CardRow): ProductCardData {
@@ -93,6 +93,7 @@ export function toCard(row: CardRow): ProductCardData {
     imageUrl: first?.url ?? null,
     imageAlt: first?.alt ?? null,
     categoryName: row.category?.name ?? null,
+    categorySlug: row.category?.slug ?? null,
     variants: variants.map(({ id, name, priceKobo, stock, fridayDeal }) => ({ id, name, priceKobo, stock, fridayDeal })),
   };
 }

@@ -42,5 +42,6 @@ export const placeOrderSchema = z.object({
   discountCode: code.optional(),
   notes: z.string().trim().max(500).optional(),
   saveAddress: z.boolean(),
+  acceptedTerms: z.literal(true, { errorMap: () => ({ message: "Please accept the Terms and Conditions to continue." }) }),
   idempotencyKey: z.string().uuid(),
 });

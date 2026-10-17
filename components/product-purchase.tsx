@@ -49,6 +49,7 @@ export function ProductPurchase({ product, returnTo = "/products" }: { product: 
         variantName: product.variants.length > 1 ? variant.name : null,
         priceKobo: variant.priceKobo,
         imageUrl: product.imageUrl,
+        categorySlug: product.categorySlug,
         maxQuantity: Math.min(variant.stock, MAX_QTY_PER_LINE),
         availableStock: variant.stock,
       },

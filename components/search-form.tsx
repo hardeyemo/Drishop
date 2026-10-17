@@ -1,9 +1,17 @@
+"use client";
+
+import * as React from "react";
 import { Search } from "lucide-react";
 
 /** Plain GET form: works without JavaScript and lands on /products?q=... */
 export function SearchForm({ className, inputId = "site-search" }: { className?: string; inputId?: string }) {
+  const categoryRef = React.useRef<HTMLInputElement>(null);
   return (
-    <form action="/products" role="search" className={className}>
+    <form action="/products" role="search" className={className} onSubmit={() => {
+      const current = new URL(window.location.href);
+      categoryRef.current!.value = current.pathname === "/products" ? current.searchParams.get("category") ?? "" : "";
+    }}>
+      <input ref={categoryRef} type="hidden" name="category" defaultValue="" />
       <label htmlFor={inputId} className="sr-only">
         Search products
       </label>

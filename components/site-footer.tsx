@@ -75,6 +75,10 @@ export async function SiteFooter() {
           <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
             <span>© {new Date().getFullYear()} {SITE_NAME}. All rights reserved.</span>
             <span>Prices are shown in Nigerian naira.</span>
+            <nav aria-label="Legal" className="flex flex-wrap gap-x-4 gap-y-1">
+              <Link href="/terms" className="hover:text-emerald-900">Terms and Conditions</Link>
+              <Link href="/cookies" className="hover:text-emerald-900">Cookie Policy</Link>
+            </nav>
           </div>
         </div>
       </div>

@@ -28,6 +28,7 @@ type VariantRow = {
     id: string;
     name: string;
     slug: string;
+    category: { slug: string } | null;
     images: { url: string; alt: string | null; sort_order: number }[];
   } | null;
 };
@@ -66,7 +67,7 @@ async function getOrCreateCart(db: SupabaseClient, userId: string): Promise<Cart
 async function getVariant(db: SupabaseClient, variantId: string) {
   const hasFridayDeals = await hasFridayDealSchema(db);
   const { data, error } = await db.from("product_variants")
-    .select(`id,product_id,name,price_kobo,${hasFridayDeals ? "friday_deal_price_kobo," : ""}stock_quantity,product:products!inner(id,name,slug,images:product_images(url,alt,sort_order))`)
+    .select(`id,product_id,name,price_kobo,${hasFridayDeals ? "friday_deal_price_kobo," : ""}stock_quantity,product:products!inner(id,name,slug,category:categories(slug),images:product_images(url,alt,sort_order))`)
     .eq("id", variantId)
     .eq("is_active", true)
     .maybeSingle();
@@ -85,7 +86,7 @@ async function readCart(db: SupabaseClient, cartId: string): Promise<CartItem[]>
   const ids = rows.map((row) => row.variant_id);
   const hasFridayDeals = await hasFridayDealSchema(db);
   const { data: variants, error: variantsError } = await db.from("product_variants")
-    .select(`id,product_id,name,price_kobo,${hasFridayDeals ? "friday_deal_price_kobo," : ""}stock_quantity,product:products!inner(id,name,slug,images:product_images(url,alt,sort_order))`)
+    .select(`id,product_id,name,price_kobo,${hasFridayDeals ? "friday_deal_price_kobo," : ""}stock_quantity,product:products!inner(id,name,slug,category:categories(slug),images:product_images(url,alt,sort_order))`)
     .in("id", ids)
     .eq("is_active", true);
   if (variantsError) throw variantsError;
@@ -106,6 +107,7 @@ async function readCart(db: SupabaseClient, cartId: string): Promise<CartItem[]>
       variantName: variant.name === "Default" ? null : variant.name,
       priceKobo: fridayDeal ? dealPrice : variant.price_kobo,
       imageUrl: image?.url ?? null,
+      categorySlug: variant.product.category?.slug ?? null,
       quantity: row.quantity,
       maxQuantity: Math.max(1, Math.min(stock, MAX_QTY_PER_LINE)),
       availableStock: stock,
