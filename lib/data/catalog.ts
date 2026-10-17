@@ -5,6 +5,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import type { Category, ProductCardData, ProductDetail } from "@/lib/types";
 import { isFridayDealActive } from "@/lib/friday-deals";
 import { hasFridayDealSchema } from "@/lib/data/friday-deal-schema";
+import { categoryDescendantIds } from "@/lib/data/category-tree";
 
 // Keep the initial catalogue page large enough to show the original seeded set
 // (18 products) together while retaining pagination for larger catalogues.
@@ -128,12 +129,14 @@ async function resolveCategoryIds(db: SupabaseClient, slug: string): Promise<str
     .eq("is_active", true)
     .maybeSingle();
   if (!cat) return null;
-  const { data: kids } = await db
+  const { data: categories } = await db
     .from("categories")
-    .select("id")
-    .eq("parent_id", cat.id)
+    .select("id,parent_id")
     .eq("is_active", true);
-  return [cat.id, ...(kids ?? []).map((k) => k.id)];
+  return categoryDescendantIds((categories ?? []).map((category) => ({
+    id: category.id,
+    parentId: category.parent_id,
+  })), cat.id);
 }
 
 export async function listProducts(params: ListParams) {

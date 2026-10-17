@@ -2,16 +2,52 @@
 
 import * as React from "react";
 import { Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 /** Plain GET form: works without JavaScript and lands on /products?q=... */
 export function SearchForm({ className, inputId = "site-search" }: { className?: string; inputId?: string }) {
+  return <React.Suspense fallback={<SearchFormMarkup className={className} inputId={inputId} query="" onQueryChange={() => {}} />}>
+    <SearchFormWithUrl className={className} inputId={inputId} />
+  </React.Suspense>;
+}
+
+function SearchFormWithUrl({ className, inputId }: { className?: string; inputId: string }) {
+  const searchParams = useSearchParams();
+  const queryFromUrl = searchParams.get("q") ?? "";
+  const [query, setQuery] = React.useState(queryFromUrl);
   const categoryRef = React.useRef<HTMLInputElement>(null);
+  React.useEffect(() => setQuery(queryFromUrl), [queryFromUrl]);
+
+  return <SearchFormMarkup
+    className={className}
+    inputId={inputId}
+    query={query}
+    onQueryChange={setQuery}
+    categoryRef={categoryRef}
+  />;
+}
+
+function SearchFormMarkup({
+  className,
+  inputId,
+  query,
+  onQueryChange,
+  categoryRef,
+}: {
+  className?: string;
+  inputId: string;
+  query: string;
+  onQueryChange: (value: string) => void;
+  categoryRef?: React.RefObject<HTMLInputElement | null>;
+}) {
+  const fallbackCategoryRef = React.useRef<HTMLInputElement>(null);
+  const formCategoryRef = categoryRef ?? fallbackCategoryRef;
   return (
     <form action="/products" role="search" className={className} onSubmit={() => {
       const current = new URL(window.location.href);
-      categoryRef.current!.value = current.pathname === "/products" ? current.searchParams.get("category") ?? "" : "";
+      formCategoryRef.current!.value = current.pathname === "/products" ? current.searchParams.get("category") ?? "" : "";
     }}>
-      <input ref={categoryRef} type="hidden" name="category" defaultValue="" />
+      <input ref={formCategoryRef} type="hidden" name="category" defaultValue="" />
       <label htmlFor={inputId} className="sr-only">
         Search products
       </label>
@@ -21,6 +57,8 @@ export function SearchForm({ className, inputId = "site-search" }: { className?:
           name="q"
           type="search"
           maxLength={80}
+          value={query}
+          onChange={(event) => onQueryChange(event.currentTarget.value)}
           placeholder="Search phones, shoes, kitchen…"
           className="min-w-0 flex-1 bg-transparent px-3 text-base text-emerald-950 outline-none placeholder:text-neutral-500 sm:px-4 sm:text-sm"
         />
